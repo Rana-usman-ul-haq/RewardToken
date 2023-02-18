@@ -1270,7 +1270,7 @@ contract MOMO is Context, ERC20, Ownable {
     IUniswapV2Router02 public uniswapV2Router;
     address public immutable uniswapV2Pair;
 
-    address public DividendsToken = address(0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56);
+    address public DividendsToken = address(0x55d398326f99059fF775485246999027B3197955);
 
     bool private swapping;
 	bool private trading;
@@ -1915,7 +1915,7 @@ contract DividendTracker is Ownable, DividendPayingToken {
     uint256 public claimWait;
     uint256 public minimumTokenBalanceForDividends;
 
-    address private DividendToken = address(0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56);
+    address private DividendToken = address(0x55d398326f99059fF775485246999027B3197955);
 
     event ExcludeFromDividends(address indexed account);
     event ClaimWaitUpdated(uint256 indexed newValue, uint256 indexed oldValue);
