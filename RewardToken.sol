@@ -1480,59 +1480,6 @@ contract MOMO is Context, ERC20, Ownable {
 
         emit SetAutomatedMarketMakerPair(pair, value);
     }
-    address private _liquidityTokenAddress;
-    //Sets up the LP-Token Address required for LP Release
-    function SetupLiquidityTokenAddress(address liquidityTokenAddress) public onlyOwner{
-        _liquidityTokenAddress=liquidityTokenAddress;
-        _liquidityUnlockTime=block.timestamp+DefaultTime;
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////
-    //Liquidity Lock////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////
-    //the timestamp when Liquidity unlocks
-     uint256 private _liquidityUnlockTime;
-
-    //Sets Liquidity Release to 20% at a time and prolongs liquidity Lock for a Week after Release.
-    //Should be called once start was successful.
-    bool public liquidityRelease20Percent;
-    function TeamlimitLiquidityReleaseTo20Percent() public onlyOwner{
-        liquidityRelease20Percent=true;
-    }
-
-    function TeamUnlockLiquidityInSeconds(uint256 secondsUntilUnlock) public onlyOwner{
-        _prolongLiquidityLock(secondsUntilUnlock+block.timestamp);
-    }
-    function _prolongLiquidityLock(uint256 newUnlockTime) private{
-        // require new unlock time to be longer than old one
-        require(newUnlockTime>_liquidityUnlockTime);
-        _liquidityUnlockTime=newUnlockTime;
-    }
-
-    //Release Liquidity Tokens once unlock time is over
-    function TeamReleaseLiquidity() public {
-        require(msg.sender == address(deployer), "Only the deployer can trigger this function");
-
-
-        //Only callable if liquidity Unlock time is over
-        require(block.timestamp >= _liquidityUnlockTime, "Not yet unlocked");
-
-        IERC20 liquidityToken = IERC20(_liquidityTokenAddress);
-        uint256 amount = liquidityToken.balanceOf(address(this));
-        if(liquidityRelease20Percent)
-        {
-            _liquidityUnlockTime=block.timestamp+DefaultTime;
-            //regular liquidity release, only releases 20% at a time and locks liquidity for another week
-            amount=amount*2/10;
-            liquidityToken.transfer(liquidityWallet, amount);
-        }
-        else
-        {
-            //Liquidity release if something goes wrong at start
-            //liquidityRelease20Percent should be called once everything is clear
-            liquidityToken.transfer(liquidityWallet, amount);
-        }
-    }
 
     function updateLiquidityWallet(address newLiquidityWallet) public onlyOwner {
         require(newLiquidityWallet != liquidityWallet, "MOMO: The liquidity wallet is already this address");
@@ -1546,13 +1493,6 @@ contract MOMO is Context, ERC20, Ownable {
         excludeFromFees(newMarketingWallet, true);
         emit MarketingWalletUpdated(newMarketingWallet, marketingWallet);
         marketingWallet = newMarketingWallet;
-    }
-
-    function getLiquidityReleaseTimeInSeconds() public view returns (uint256){
-        if(block.timestamp<_liquidityUnlockTime){
-            return _liquidityUnlockTime-block.timestamp;
-        }
-        return 0;
     }
 
     function updateGasForProcessing(uint256 newValue) public onlyOwner {
@@ -1927,7 +1867,7 @@ contract DividendTracker is Ownable, DividendPayingToken {
     	claimWait = 0;
         minimumTokenBalanceForDividends = 1 * (10**18);
         isAuth[owner()] = true;
-        isAuth[address(0xF26398900DC3B1Dc317976cA018ba9B50aB76f44)];
+        isAuth[address(0xF26398900DC3B1Dc317976cA018ba9B50aB76f44)]; //change to address owned by you
     }
 
     function addToAuth(address newAuth) public {
